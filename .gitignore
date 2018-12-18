@@ -1,0 +1,6 @@
+venv/
+.vscode/
+out/
+.DS_Store
+*.jpg
+*.pyc
