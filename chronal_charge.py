@@ -21,18 +21,18 @@ if __name__ == "__main__":
 
     square_powers = {}
 
-    for i, cell in enumerate(grid):
-        row, col = divmod(i, SIZE)
-        row_min = row - 1 if row - 1 >= 0 else row
-        row_max = row + 2 if row + 2 <= SIZE else row + 1
-        col_min = col - 1 if col - 1 >= 0 else col
-        col_max = col + 2 if col + 2 <= SIZE else col + 1
+    for width in range(3, 300):
+        for i in range(len(grid)):
+            row, col = divmod(i, SIZE)
 
-        if row - 1 < 0 or col - 1 < 0 or row + 2 > SIZE or col + 2 > SIZE:
-            continue
+            row_max = row + width
+            col_max = col + width
 
-        adjacent_acres = grid_helper[row_min:row_max, col_min:col_max]
-        total_power = np.sum(adjacent_acres)
-        square_powers[(col, row)] = total_power
+            if row_max > SIZE or col_max > SIZE:
+                continue
+
+            square = grid_helper[row:row_max, col:col_max]
+            total_power = np.sum(square)
+            square_powers[(col + 1, row + 1, width)] = total_power
 
     print(max(square_powers.items(), key=lambda item: item[1]))
