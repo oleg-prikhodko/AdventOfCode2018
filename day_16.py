@@ -1,5 +1,5 @@
 import re
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 REGISTERS = None
 
@@ -10,6 +10,11 @@ class State:
         self.opcode = opcode
         self.params = params
         self.after = after
+
+    def __repr__(self):
+        return (
+            f"State({self.before}, {self.opcode}, {self.params}, {self.after})"
+        )
 
 
 def addr(reg_a, reg_b, reg_c):
@@ -110,6 +115,15 @@ def load_states(filename="day_16.txt"):
         return states
 
 
+def load_program(filename="day_16.txt"):
+    with open(filename) as input_file:
+        lines = input_file.read()
+        instructions = []
+        for program_line in lines.partition("\n\n\n\n")[2].splitlines():
+            instructions.append(tuple(map(int, program_line.split(" "))))
+        return instructions
+
+
 if __name__ == "__main__":
     states = load_states()
     ops = [
@@ -130,13 +144,34 @@ if __name__ == "__main__":
         eqri,
         eqrr,
     ]
-    ops_by_states = defaultdict(list)
+
+    states_by_ops = defaultdict(list)
 
     for state in states:
         for op in ops:
             REGISTERS = eval(state.before)
             op(*state.params)
             if REGISTERS == eval(state.after):
-                ops_by_states[state].append(op)
+                states_by_ops[op].append(state)
 
-    print(sum(1 for ops in ops_by_states.values() if len(ops) >= 3))
+    counts = {
+        op: set(Counter(map(lambda state: state.opcode, states)))
+        for op, states in states_by_ops.items()
+    }
+    function_by_opcode = {}
+
+    at_least_one_left = lambda: any(counts.values())
+
+    while at_least_one_left():
+        for func, possible_opcodes in counts.items():
+            if len(possible_opcodes) == 1:
+                opcode = possible_opcodes.pop()
+                function_by_opcode[opcode] = func
+                for _, po in counts.items():
+                    if opcode in po:
+                        po.remove(opcode)
+
+    instructions = load_program()
+    for opcode, *params in instructions:
+        function_by_opcode[opcode](*params)
+    print(REGISTERS[0])
