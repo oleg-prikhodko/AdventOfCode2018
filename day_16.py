@@ -1,7 +1,5 @@
 import re
-from functools import partial
-from operator import add, and_, mul, or_
-from collections import defaultdict, Counter
+from collections import defaultdict
 
 REGISTERS = None
 
