@@ -1,5 +1,5 @@
 import re
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 
 REGISTERS = None
 
@@ -17,83 +17,83 @@ class State:
         )
 
 
-def addr(reg_a, reg_b, reg_c):
-    global REGISTERS
+def addr(REGISTERS, reg_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] + REGISTERS[reg_b]
 
 
-def addi(reg_a, val_b, reg_c):
-    global REGISTERS
+def addi(REGISTERS, reg_a, val_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] + val_b
 
 
-def mulr(reg_a, reg_b, reg_c):
-    global REGISTERS
+def mulr(REGISTERS, reg_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] * REGISTERS[reg_b]
 
 
-def muli(reg_a, val_b, reg_c):
-    global REGISTERS
+def muli(REGISTERS, reg_a, val_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] * val_b
 
 
-def banr(reg_a, reg_b, reg_c):
-    global REGISTERS
+def banr(REGISTERS, reg_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] & REGISTERS[reg_b]
 
 
-def bani(reg_a, val_b, reg_c):
-    global REGISTERS
+def bani(REGISTERS, reg_a, val_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] & val_b
 
 
-def borr(reg_a, reg_b, reg_c):
-    global REGISTERS
+def borr(REGISTERS, reg_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] | REGISTERS[reg_b]
 
 
-def bori(reg_a, val_b, reg_c):
-    global REGISTERS
+def bori(REGISTERS, reg_a, val_b, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a] | val_b
 
 
-def setr(reg_a, _, reg_c):
-    global REGISTERS
+def setr(REGISTERS, reg_a, _, reg_c):
+
     REGISTERS[reg_c] = REGISTERS[reg_a]
 
 
-def seti(val_a, _, reg_c):
-    global REGISTERS
+def seti(REGISTERS, val_a, _, reg_c):
+
     REGISTERS[reg_c] = val_a
 
 
-def gtir(val_a, reg_b, reg_c):
-    global REGISTERS
+def gtir(REGISTERS, val_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = 1 if val_a > REGISTERS[reg_b] else 0
 
 
-def gtri(reg_a, val_b, reg_c):
-    global REGISTERS
+def gtri(REGISTERS, reg_a, val_b, reg_c):
+
     REGISTERS[reg_c] = 1 if REGISTERS[reg_a] > val_b else 0
 
 
-def gtrr(reg_a, reg_b, reg_c):
-    global REGISTERS
+def gtrr(REGISTERS, reg_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = 1 if REGISTERS[reg_a] > REGISTERS[reg_b] else 0
 
 
-def eqir(val_a, reg_b, reg_c):
-    global REGISTERS
+def eqir(REGISTERS, val_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = 1 if val_a == REGISTERS[reg_b] else 0
 
 
-def eqri(reg_a, val_b, reg_c):
-    global REGISTERS
+def eqri(REGISTERS, reg_a, val_b, reg_c):
+
     REGISTERS[reg_c] = 1 if REGISTERS[reg_a] == val_b else 0
 
 
-def eqrr(reg_a, reg_b, reg_c):
-    global REGISTERS
+def eqrr(REGISTERS, reg_a, reg_b, reg_c):
+
     REGISTERS[reg_c] = 1 if REGISTERS[reg_a] == REGISTERS[reg_b] else 0
 
 
@@ -124,33 +124,33 @@ def load_program(filename="day_16.txt"):
         return instructions
 
 
+ops = [
+    addr,
+    addi,
+    mulr,
+    muli,
+    banr,
+    bani,
+    borr,
+    bori,
+    setr,
+    seti,
+    gtir,
+    gtri,
+    gtrr,
+    eqir,
+    eqri,
+    eqrr,
+]
+
 if __name__ == "__main__":
     states = load_states()
-    ops = [
-        addr,
-        addi,
-        mulr,
-        muli,
-        banr,
-        bani,
-        borr,
-        bori,
-        setr,
-        seti,
-        gtir,
-        gtri,
-        gtrr,
-        eqir,
-        eqri,
-        eqrr,
-    ]
-
     states_by_ops = defaultdict(list)
 
     for state in states:
         for op in ops:
             REGISTERS = eval(state.before)
-            op(*state.params)
+            op(REGISTERS, *state.params)
             if REGISTERS == eval(state.after):
                 states_by_ops[op].append(state)
 
@@ -173,5 +173,5 @@ if __name__ == "__main__":
 
     instructions = load_program()
     for opcode, *params in instructions:
-        function_by_opcode[opcode](*params)
+        function_by_opcode[opcode](REGISTERS, *params)
     print(REGISTERS[0])
